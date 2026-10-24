@@ -1,0 +1,38 @@
+{
+  "name": "goomba-xi-web",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Goomba XI website: accounts, characters, tools and the launcher sign-in API",
+  "license": "GPL-3.0-or-later",
+  "scripts": {
+    "dev": "next dev",
+    "build": "node scripts/gen-data.mjs && next build",
+    "start": "next start",
+    "typecheck": "tsc --noEmit",
+    "gen:data": "node scripts/gen-data.mjs",
+    "migrate": "node scripts/migrate.mjs",
+    "import-items": "node scripts/import-items.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "js-yaml": "^5.5.0",
+    "marked": "^18.1.1",
+    "mysql2": "^3.24.6",
+    "next": "^16.4.2",
+    "nodemailer": "^10.2.1",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "server-only": "^0.0.1"
+  },
+  "devDependencies": {
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "^26.6.5",
+    "@types/nodemailer": "^8.0.2",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "typescript": "^5.9.3"
+  }
+}

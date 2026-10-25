@@ -50,8 +50,15 @@ export async function itemInfo(ids: number[]): Promise<Map<number, ItemInfo>> {
   return out
 }
 
-/** Folder of item icons on the file server (made by scripts/import-items.mjs --icons). */
-export const iconBase = (): string => (env.filesUrl ? `${env.filesUrl}/icons/items` : '')
+/**
+ * Folder of item icons (made by scripts/import-items.mjs --icons). ICONS_URL when set (the server
+ * installer serves them from this site at /icons/items), otherwise <FILES_URL>/icons/items.
+ */
+export const iconBase = (): string => {
+  const own = (process.env.ICONS_URL ?? '').trim().replace(/\/+$/, '')
+  if (own) return own
+  return env.filesUrl ? `${env.filesUrl}/icons/items` : ''
+}
 
 // ---- Characters ---------------------------------------------------------------------------
 
@@ -88,7 +95,10 @@ type RawChar = Omit<CharacterRow, 'online' | 'anon'> & { online: number; anon: n
 const toChar = (r: RawChar): CharacterRow => ({ ...r, online: !!r.online, anon: !!r.anon })
 
 export async function searchCharacters(opts: { q?: string; nation?: number; online?: boolean; page?: number; perPage?: number }) {
-  const where = ['c.accid > 0', 'c.gmlevel = 0', 'COALESCE(p.hide_profile, 0) = 0']
+  // GM characters are listed too (on a solo server the player is usually the GM); set
+  // HIDE_GM_CHARACTERS=1 in web.env to leave them out.
+  const where = ['c.accid > 0', 'COALESCE(p.hide_profile, 0) = 0']
+  if (process.env.HIDE_GM_CHARACTERS === '1') where.push('c.gmlevel = 0')
   const params: (string | number)[] = []
   if (opts.q) {
     where.push('c.charname LIKE ?')

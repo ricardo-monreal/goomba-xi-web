@@ -8,6 +8,9 @@
 //          YAML/ROM/286/73.yml, YAML/ROM/301/115.yml).
 // --yaml   extra Kraken item YAML files, e.g. your own dump of ROM/118/106 (general items,
 //          which Era-DATs doesn't change and so doesn't include). Later files win.
+// --dat    a raw general-items DAT (ROM/118/106.DAT: crystals, materials, furnishings), read
+//          directly. Added automatically from --era when its 106.yml is empty, which is the
+//          case for Era-DATs (it ships that DAT but no YAML for it). YAML entries win.
 // --icons  write <id>.png for every item into this folder. Upload the folder to your file
 //          server as <FILES_URL>/icons/items/ (see the README).
 // Names and descriptions go into the website database's item_text table (WEB_DB_NAME), using
@@ -20,11 +23,12 @@ import * as yaml from 'js-yaml'
 import mysql from 'mysql2/promise'
 
 const args = process.argv.slice(2)
-const opt = { era: '', yaml: [], icons: '', dryRun: false }
+const opt = { era: '', yaml: [], dat: [], icons: '', dryRun: false }
 for (let i = 0; i < args.length; i++) {
   const a = args[i]
   if (a === '--era') opt.era = args[++i]
   else if (a === '--yaml') opt.yaml.push(args[++i])
+  else if (a === '--dat') opt.dat.push(args[++i])
   else if (a === '--icons') opt.icons = args[++i]
   else if (a === '--dry-run') opt.dryRun = true
   else {
@@ -41,10 +45,13 @@ if (opt.era) {
     if (existsSync(f)) files.push(f)
   }
   if (!files.length) throw new Error(`import-items: no item YAML found under ${base}`)
+  const generalYaml = join(base, 'ROM/118/106.yml')
+  const generalDat = join(opt.era, 'ROM/118/106.DAT')
+  if ((!existsSync(generalYaml) || readFileSync(generalYaml, 'utf8').length < 100) && existsSync(generalDat)) opt.dat.push(generalDat)
 }
 files.push(...opt.yaml)
-if (!files.length) {
-  console.error('usage: node scripts/import-items.mjs --era <Era-DATs dir> [--yaml file ...] [--icons dir] [--dry-run]')
+if (!files.length && !opt.dat.length) {
+  console.error('usage: node scripts/import-items.mjs --era <Era-DATs dir> [--yaml file ...] [--dat 106.DAT ...] [--icons dir] [--dry-run]')
   process.exit(2)
 }
 
@@ -128,6 +135,57 @@ for (const f of files) {
   }
   console.log(`import-items: ${f}: ${n} items`)
 }
+// ---- Raw general-item DATs -----------------------------------------------------------------
+
+// Each record is 0x1400 bytes, every byte rotated left by 3 bits (decode: rotate right by 5).
+// General items: u32 id at 0, a string table at 0x1C (u32 count, then u32 offset + u32 type per
+// entry, offsets from the table; a type-0 string's text starts 28 bytes in: entry 0 is the name,
+// entry 4 the description) and the icon at 0x280 (u32 size, then the same bytes as icon_bytes).
+const RECORD = 0x1400
+const decodeRecord = (buf, at) => {
+  const r = Buffer.alloc(RECORD)
+  for (let i = 0; i < RECORD; i++) {
+    const b = buf[at + i]
+    r[i] = ((b >> 5) | (b << 3)) & 0xff
+  }
+  return r
+}
+const datString = (r, table, entry) => {
+  const count = r.readUInt32LE(table)
+  if (entry >= count || count > 16) return ''
+  const off = r.readUInt32LE(table + 4 + entry * 8)
+  const start = table + off + 28
+  if (start >= RECORD) return ''
+  let end = start
+  while (end < RECORD && r[end] !== 0) end++
+  return r.toString('latin1', start, end).replace(/[\x00-\x09\x0b-\x1f]/g, '').trim()
+}
+for (const f of opt.dat) {
+  const buf = readFileSync(f)
+  let n = 0
+  for (let at = 0; at + RECORD <= buf.length; at += RECORD) {
+    const r = decodeRecord(buf, at)
+    const id = r.readUInt32LE(0)
+    if (id <= 0 || id >= 65535 || items.has(id)) continue
+    const name = datString(r, 0x1c, 0)
+    if (!name || name === '.') continue
+    const description = datString(r, 0x1c, 4)
+    let hasIcon = false
+    const size = r.readUInt32LE(0x280)
+    if (size > 17 && size <= RECORD - 0x284) {
+      const png = iconToPng(r.subarray(0x284, 0x284 + size).toString('base64'))
+      if (png) {
+        hasIcon = true
+        if (opt.icons && !opt.dryRun) writeFileSync(join(opt.icons, `${id}.png`), png)
+        icons++
+      }
+    }
+    items.set(id, { id, name: name.slice(0, 64), description, hasIcon })
+    n++
+  }
+  console.log(`import-items: ${f}: ${n} items`)
+}
+
 console.log(`import-items: ${items.size} items, ${icons} icons${opt.icons && !opt.dryRun ? ` written to ${opt.icons}` : ''}`)
 if (opt.dryRun) {
   const sample = [...items.values()].slice(0, 3).map((i) => `${i.id} ${i.name}`)

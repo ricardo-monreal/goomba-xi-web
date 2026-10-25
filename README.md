@@ -48,22 +48,31 @@ Environment variables (on the server: `/etc/goomba/web.env`, written by `goomba 
 | `WEB_DB_NAME` | The site's own database, default `goomba_web`. |
 | `SESSION_SECRET` | Required; long random string. |
 | `SMTP_URL`, `MAIL_FROM` | Outgoing mail for password resets, e.g. `smtps://user:pass@smtp.example.com:465`. Without it, reset links are written to the log (`goomba logs web`). |
+| `ICONS_URL` | Where item icons are served, e.g. `/icons/items` (set by `goomba web-items`). |
+| `HIDE_GM_CHARACTERS` | `1` leaves GM characters out of the character search. |
 | `DISCORD_URL`, `YOUTUBE_URL`, `X_URL`, `WIKI_URL` | Optional links in the header and footer. |
 
 The `goomba_web` MariaDB user needs: everything on `goomba_web`; `SELECT` on `xidb`; `INSERT, UPDATE, DELETE` on `xidb.accounts` and `xidb.accounts_login_tokens`. The server installer grants exactly that.
 
 ## Item names and icons
 
-The game database only has internal item names (`onion_sword`). Real names, descriptions and icons come from the client's item DATs. Import them from the [Era-DATs](https://github.com/phoenixffxi/Era-DATs) (era-accurate text from the Phoenix project) once, and again whenever Era-DATs changes:
+The game database only has internal item names (`onion_sword`). Real names, descriptions and icons come from the client's item DATs, read from the [Era-DATs](https://github.com/phoenixffxi/Era-DATs) (era-accurate text from the Phoenix project): its YAML for equipment and usable items, and its raw `ROM/118/106.DAT` for crystals, materials and furnishings. About 23,000 items in all.
+
+On the server this is one command (it also runs once during `goomba install`):
 
 ```bash
-git clone https://github.com/phoenixffxi/Era-DATs /tmp/Era-DATs
-set -a; source /etc/goomba/web.env; set +a
-node scripts/import-items.mjs --era /tmp/Era-DATs --icons /tmp/item-icons
-# Upload /tmp/item-icons/*.png to the file server as <FILES_URL>/icons/items/
+sudo goomba web-items
 ```
 
-That covers ~19,400 items. General items (crystals, materials, furnishings in `ROM/118/106`) aren't in Era-DATs because it doesn't change them; dump that DAT with [Kraken](https://github.com/Frankie-hz/Kraken) from a game install and add `--yaml 106.yml`. Until then those items show a tidied server name and a placeholder icon.
+It writes the names to the `item_text` table, the icons to `/var/lib/goomba/icons/items/`, which nginx serves at `/icons/items/`, and sets `ICONS_URL=/icons/items` in `web.env`. By hand:
+
+```bash
+git clone --depth 1 https://github.com/phoenixffxi/Era-DATs /tmp/Era-DATs
+set -a; source /etc/goomba/web.env; set +a
+node scripts/import-items.mjs --era /tmp/Era-DATs --icons /tmp/item-icons
+```
+
+Without `ICONS_URL`, icons are loaded from `<FILES_URL>/icons/items/` instead.
 
 ## Writing a blog post
 

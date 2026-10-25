@@ -1,6 +1,7 @@
 import type { NextConfig } from 'next'
 
-const filesUrl = process.env.FILES_URL ?? ''
+const rawFiles = (process.env.FILES_URL ?? '').trim().replace(/\/+$/, '')
+const filesUrl = rawFiles && !/^https?:\/\//i.test(rawFiles) ? `http://${rawFiles}` : rawFiles
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,

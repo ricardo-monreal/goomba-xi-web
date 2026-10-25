@@ -11,7 +11,9 @@ export const env = {
     return (process.env.SITE_URL ?? 'http://localhost:3000').replace(/\/$/, '')
   },
   get filesUrl() {
-    return (process.env.FILES_URL ?? '').replace(/\/$/, '')
+    // Accept a bare address ("10.2.5.65"): without a scheme the links would be relative to this site.
+    const raw = (process.env.FILES_URL ?? '').trim().replace(/\/+$/, '')
+    return raw && !/^https?:\/\//i.test(raw) ? `http://${raw}` : raw
   },
   get db() {
     return {

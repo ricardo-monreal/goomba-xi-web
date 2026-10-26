@@ -8,12 +8,12 @@ export type Feature = { title: string; badge: string; summary: string; details: 
 
 export const FEATURES: Feature[] = [
   {
-    title: 'Double experience',
-    badge: '2× EXP',
-    summary: 'Twice the experience points from monsters, quests and missions.',
+    title: 'Triple experience',
+    badge: '3× EXP',
+    summary: 'Three times the experience points from monsters, quests and missions.',
     details: [
-      'Every kill gives double experience points, in parties and solo.',
-      'Experience rewards from quests and missions are doubled too.',
+      'Every kill gives triple experience points, in parties and solo.',
+      'Experience rewards from quests and missions are tripled too.',
       'Level 50 to start, raised to 75 through Maat’s Limit Break quests, as in 2007.'
     ]
   },

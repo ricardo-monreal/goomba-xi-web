@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { FEATURES } from '@/data/features'
 
 export const metadata = { title: 'Overview' }
 
@@ -17,9 +18,25 @@ export default function Overview() {
         <li><strong>Content:</strong> the original game, Rise of the Zilart, Chains of Promathia and Treasures of Aht Urhgan.</li>
         <li><strong>Level cap:</strong> 50 at first, raised to 75 through Maat&apos;s Limit Break quests.</li>
         <li><strong>Not here:</strong> Wings of the Goddess and later content, Abyssea, Records of Eminence, Field and Grounds of Valor manuals, home point teleports, Mog Garden.</li>
-        <li><strong>Trusts:</strong> on, up to five at a time and allowed everywhere, so a small group (or one player) can see the whole game. The Trust Liaison in Lower Jeuno sells more of them for conquest points.</li>
-        <li><strong>Rates:</strong> double experience, faster combat and crafting skill-ups, retail drop rates.</li>
+        <li><strong>Drop rates:</strong> retail. Faster experience and skill-ups are below.</li>
       </ul>
+
+      <h2 id="features">Server features</h2>
+      <p>
+        Goomba XI keeps the 2007 game but trims the slowest grinds, so it is fun with a small group or on your own.
+      </p>
+      {FEATURES.map((f) => (
+        <section key={f.title}>
+          <h3>
+            {f.title} <span className="feature-badge">{f.badge}</span>
+          </h3>
+          <ul>
+            {f.details.map((d) => (
+              <li key={d}>{d}</li>
+            ))}
+          </ul>
+        </section>
+      ))}
 
       <h2>Era-accurate client</h2>
       <p>

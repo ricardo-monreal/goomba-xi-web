@@ -4,6 +4,7 @@ import VanaClock from '@/components/VanaClock'
 import { allPosts, formatDate } from '@/lib/blog'
 import { onlineCount } from '@/lib/db'
 import { downloads, SITE_TAGLINE } from '@/lib/site'
+import { FEATURES } from '@/data/features'
 
 export default async function Home() {
   const posts = allPosts().slice(0, 3)
@@ -43,6 +44,24 @@ export default async function Home() {
       </section>
 
       <section className="container page">
+        <div className="row" style={{ justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 14 }}>
+          <h2 style={{ margin: 0 }}>Server features</h2>
+          <Link href="/overview#features" className="small">
+            All the details →
+          </Link>
+        </div>
+        <div className="cards" style={{ marginBottom: 40 }}>
+          {FEATURES.map((f) => (
+            <Link key={f.title} href="/overview#features" className="card">
+              <span className="feature-badge">{f.badge}</span>
+              <h3>{f.title}</h3>
+              <p className="muted" style={{ margin: 0 }}>
+                {f.summary}
+              </p>
+            </Link>
+          ))}
+        </div>
+
         <div className="grid-3">
           <div className="panel" style={{ gridColumn: 'span 2' }}>
             <div className="panel-head">

@@ -159,19 +159,17 @@ input[type='checkbox'] { accent-color: var(--accent); width: 16px; height: 16px;
 .site-footer a { color: var(--text-2); }
 
 /* ---- Hero ------------------------------------------------------------------------------ */
-.hero { position: relative; overflow: hidden; padding: 84px 0 72px; border-bottom: 1px solid var(--line); }
+.hero { position: relative; overflow: hidden; padding: 84px 0 72px; border-bottom: 1px solid var(--line); min-height: 440px; background: #0a0c18 url('/hero.jpg') right center / cover no-repeat; }
 .hero::before {
   content: ''; position: absolute; inset: 0; pointer-events: none;
-  background:
-    radial-gradient(600px 300px at 72% 40%, rgba(232, 165, 61, 0.22), transparent 70%),
-    radial-gradient(500px 400px at 80% 60%, rgba(111, 123, 255, 0.18), transparent 70%);
+  background: linear-gradient(90deg, rgba(8, 9, 20, 0.94) 0%, rgba(8, 9, 20, 0.6) 36%, rgba(8, 9, 20, 0) 58%);
 }
 .hero .container { position: relative; display: grid; grid-template-columns: 1.2fr 1fr; gap: 40px; align-items: center; }
 .hero h1 { font-size: clamp(40px, 6vw, 72px); letter-spacing: 0.08em; margin-bottom: 12px; }
 .hero h1 span { color: var(--accent); }
 .hero .lede { font-size: 18px; }
 .hero-art { width: 100%; max-width: 420px; justify-self: center; filter: drop-shadow(0 30px 60px rgba(232, 165, 61, 0.25)); }
-@media (max-width: 900px) { .hero .container { grid-template-columns: 1fr; } .hero-art { max-width: 260px; } }
+@media (max-width: 900px) { .hero .container { grid-template-columns: 1fr; } .hero { background: linear-gradient(165deg, #141834 0%, #0f1228 45%, #0a0c18 100%); min-height: 0; } }
 
 /* ---- Lists & tables -------------------------------------------------------------------- */
 .list { display: flex; flex-direction: column; }

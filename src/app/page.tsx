@@ -1,5 +1,4 @@
 import Link from 'next/link'
-import BrandMark from '@/components/BrandMark'
 import VanaClock from '@/components/VanaClock'
 import { allPosts, formatDate } from '@/lib/blog'
 import { onlineCount } from '@/lib/db'
@@ -19,7 +18,7 @@ export default async function Home() {
             <h1>
               GOOMBA <span>XI</span>
             </h1>
-            <p className="lede">{SITE_TAGLINE} The nations, Zilart, Promathia and Aht Urhgan, the way they were, with the community that made them.</p>
+            <p className="lede">{SITE_TAGLINE}</p>
             <div className="row" style={{ marginTop: 28 }}>
               {dl.windows ? (
                 <a className="btn btn-primary btn-lg" href={dl.windows}>
@@ -39,7 +38,6 @@ export default async function Home() {
               <Link href="/register">Create a free account</Link>
             </p>
           </div>
-          <BrandMark className="hero-art" title="Goomba XI" />
         </div>
       </section>
 

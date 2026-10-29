@@ -19,6 +19,7 @@ export default function Footer() {
           <Link href="/rules">Rules</Link>
           <Link href="/approved-addons">Approved Addons</Link>
           <Link href="/faq">FAQ</Link>
+          <a href="/docs/">Server docs</a>
           <Link href="/privacy">Privacy</Link>
           {socialLinks().map((s) => (
             <a key={s.label} href={s.url} target="_blank" rel="noreferrer">
